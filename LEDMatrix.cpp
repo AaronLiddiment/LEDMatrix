@@ -150,8 +150,8 @@ void cLEDMatrixBase::DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CR
   int16_t dy = y1 - y0;
   if (abs(dx) >= abs(dy))
   {
-    int32_t f = (dy << 16) / abs(dx);
-    int32_t y = (y0 << 16) + 32768;
+    int32_t f = ((int32_t)dy << 16) / (int32_t)abs(dx);
+    int32_t y = ((int32_t)y0 << 16) + 32768;
     if (dx >= 0)
     {
       for (; x0<=x1; ++x0,y+=f)
@@ -165,8 +165,8 @@ void cLEDMatrixBase::DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CR
   }
   else
   {
-    int32_t f = (dx << 16) / abs(dy);
-    int32_t x = (x0 << 16) + 32768;
+    int32_t f = ((int32_t)dx << 16) / (int32_t)abs(dy);
+    int32_t x = ((int32_t)x0 << 16) + 32768;
     if (dy >= 0)
     {
       for (; y0<=y1; ++y0,x+=f)
