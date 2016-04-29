@@ -11,7 +11,7 @@
 
 #include <FastLED.h>
 #include <FastLED_GFX.h>
-#include <FastLEDMatrix.h>
+#include <LEDMatrix.h>
 
 #define LED_PIN        2
 #define COLOR_ORDER    GRB
