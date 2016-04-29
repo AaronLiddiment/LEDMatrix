@@ -1,5 +1,5 @@
 #include <FastLED.h>
-
+#include <FastLED_GFX.h> // https://github.com/Jorgen-VikingGod/FastLED-GFX
 #include <LEDMatrix.h>
 
 // Change the next 6 defines to match your matrix type and size
@@ -10,7 +10,7 @@
 
 #define MATRIX_WIDTH   80  // Set this negative if physical led 0 is opposite to where you want logical 0
 #define MATRIX_HEIGHT  10  // Set this negative if physical led 0 is opposite to where you want logical 0
-#define MATRIX_TYPE    HORIZONTAL_MATRIX  // See top of LEDMatrix.h for matrix wiring types
+#define MATRIX_TYPE    (MTX_MATRIX_TOP + MTX_MATRIX_LEFT + MTX_MATRIX_ROWS + MTX_MATRIX_ZIGZAG) // See top of LEDMatrix.h for matrix wiring types
 
 cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> leds;
 
@@ -44,7 +44,7 @@ void loop()
   uint8_t h;
 
   FastLED.clear();
-  
+
   h = hue;
   if (counter < 1125)
   {
@@ -92,4 +92,3 @@ void loop()
     counter = 0;
   FastLED.show();
 }
-
