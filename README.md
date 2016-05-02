@@ -1,16 +1,18 @@
 
 # LEDMatrix
----------------------------
-FastLED port of ([Adafruit-NeoMatrix](https://github.com/adafruit/Adafruit_NeoMatrix)) and simple merge with ([cLEDMatrix](https://github.com/AaronLiddiment/LEDMatrix) by [Aaron Liddiment](https://github.com/AaronLiddiment))
+------------
+[![GitHub version](https://img.shields.io/github/release/Jorgen-VikingGod/LEDMatrix.svg)](https://github.com/Jorgen-VikingGod/LEDMatrix/releases/tag/v0.1.0) 
+[![GitHub version](https://img.shields.io/badge/dependencies-FastLED-456789.svg)](https://github.com/FastLED/FastLED) 
+[![GitHub version](https://img.shields.io/badge/dependencies-FastLED--GFX-456789.svg)](https://github.com/Jorgen-VikingGod/FastLED-GFX)
+
+> A fork of ([cLEDMatrix](https://github.com/AaronLiddiment/LEDMatrix) by [Aaron Liddiment](https://github.com/AaronLiddiment)) and FastLED port of ([Adafruit-NeoMatrix](https://github.com/adafruit/Adafruit_NeoMatrix)) by using the graphics library [FastLED-GFX](https://github.com/Jorgen-VikingGod/FastLED-GFX) (based on [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library))
 
 Once you have downloaded the Zip file, it should be extracted into your Arduino Libraries folder and the folder renamed to "LEDMatrix".
-
-For full instructions see the Wiki icon on the right.
 
 <table>
   <tr>
     <td colspan="2">
-      The LEDMatrix library based on Adafruit-NeoMatrix and cLEDMatrix to create two-dimensional graphic displays using FastLED. You can then easily draw shapes, text and animation without having to calculate every X/Y pixel position. Larger displays can be formed using sections of LED strip / matrices, as shown in the photo below.
+      The LEDMatrix library based on cLEDMatrix and Adafruit-NeoMatrix to create two-dimensional graphic displays using FastLED. You can then easily draw shapes, text and animation without having to calculate every X/Y pixel position. Larger displays can be formed using sections of LED strip / matrices, as shown in the photo below.
     </td>
   </tr>
   <tr style="vertical-align: top;">
