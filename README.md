@@ -1,9 +1,10 @@
 
 # LEDMatrix
 ------------
+[![Travis build](https://travis-ci.org/Jorgen-VikingGod/LEDMatrix.svg)](https://travis-ci.org/Jorgen-VikingGod/LEDMatrix) 
 [![GitHub version](https://badge.fury.io/gh/Jorgen-VikingGod%2FLEDMatrix.svg)](https://badge.fury.io/gh/Jorgen-VikingGod%2FLEDMatrix) 
-[![GitHub version](https://img.shields.io/badge/dependencies-FastLED-blue.svg)](https://github.com/FastLED/FastLED) 
-[![GitHub version](https://img.shields.io/badge/dependencies-FastLED--GFX-456789.svg)](https://github.com/Jorgen-VikingGod/FastLED-GFX)
+[![FastLED dependencies](https://img.shields.io/badge/dependencies-FastLED-blue.svg)](https://github.com/FastLED/FastLED) 
+[![FastLED-GFX dependencies](https://img.shields.io/badge/dependencies-FastLED--GFX-456789.svg)](https://github.com/Jorgen-VikingGod/FastLED-GFX)
 
 > A fork of ([cLEDMatrix](https://github.com/AaronLiddiment/LEDMatrix) by [Aaron Liddiment](https://github.com/AaronLiddiment)) and FastLED port of ([Adafruit-NeoMatrix](https://github.com/adafruit/Adafruit_NeoMatrix)) by using the graphics library [FastLED-GFX](https://github.com/Jorgen-VikingGod/FastLED-GFX) (based on [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library))
 
