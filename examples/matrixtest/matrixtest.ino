@@ -55,7 +55,6 @@ void setup() {
   FastLED.clear(true);
 
   matrix.setTextWrap(false);
-  matrix.setBrightness(40);
   matrix.setTextColor(colors[0]);
 }
 
