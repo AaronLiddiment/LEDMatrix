@@ -1,7 +1,7 @@
 
 # LEDMatrix
 ------------
-[![Travis build](https://travis-ci.org/Jorgen-VikingGod/LEDMatrix.svg)](https://travis-ci.org/Jorgen-VikingGod/LEDMatrix) 
+[![Travis build](https://img.shields.io/travis/Jorgen-VikingGod/LEDMatrix.svg)](https://travis-ci.org/Jorgen-VikingGod/LEDMatrix) 
 [![GitHub version](https://img.shields.io/github/release/Jorgen-VikingGod/LEDMatrix.svg)](https://github.com/Jorgen-VikingGod/LEDMatrix/releases/latest) 
 [![FastLED dependencies](https://img.shields.io/badge/dependencies-FastLED-blue.svg)](https://github.com/FastLED/FastLED) 
 [![FastLED-GFX dependencies](https://img.shields.io/badge/dependencies-FastLED--GFX-456789.svg)](https://github.com/Jorgen-VikingGod/FastLED-GFX)
