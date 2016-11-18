@@ -30,7 +30,8 @@ uint8_t angle = 0;
 
 void setup()
 {
-  FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds[0], leds.Size());
+  FastLED.addLeds<CHIPSET, DATA_PIN,  CLOCK_PIN,  COLOR_ORDER>(leds[0], 0,             leds.Size()/2).setCorrection(TypicalSMD5050);
+  FastLED.addLeds<CHIPSET, DATA2_PIN, CLOCK2_PIN, COLOR_ORDER>(leds[0], leds.Size()/2, leds.Size()/2).setCorrection(TypicalSMD5050);
   FastLED.setBrightness(127);
   FastLED.clear(true);
   delay(500);
