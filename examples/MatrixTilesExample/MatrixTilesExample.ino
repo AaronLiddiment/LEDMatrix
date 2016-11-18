@@ -2,10 +2,10 @@
 #include <LEDMatrix.h>
 
 // Change the next defines to match your matrix type and size
-#define DATA_PIN            D2
-#define CLOCK_PIN           D1
-#define DATA2_PIN           D4
-#define CLOCK2_PIN          D3
+#define DATA_PIN            GPIO4
+#define CLOCK_PIN           GPIO5
+#define DATA2_PIN           GPIO2
+#define CLOCK2_PIN          GPIO0
 
 #define COLOR_ORDER         BGR
 #define CHIPSET             APA102
