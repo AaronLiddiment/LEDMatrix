@@ -14,8 +14,6 @@ install:
 # install lib arduino json not working in 1.6.5
 #  - arduino --install-library "FastLED"
   - git clone https://github.com/FastLED/FastLED /usr/local/share/arduino/libraries/FastLED
-#  - arduino --install-library "FastLED-GFX"
-  - git clone https://github.com/Jorgen-VikingGod/FastLED-GFX /usr/local/share/arduino/libraries/FastLED-GFX
   - arduino --install-boards esp8266:esp8266
   - arduino --board esp8266:esp8266:generic --save-prefs
   - arduino --pref "compiler.warning_level=all" --save-prefs
@@ -26,9 +24,6 @@ script:
   - source $TRAVIS_BUILD_DIR/travis/common.sh
   - build_examples
 #  - "cat $PWD/examples/MatrixExample1/MatrixExample1.ino"
-#  - arduino -v --verbose-build --verify $PWD/examples/MatrixExample1/MatrixExample1.ino
-#  - arduino --verify --board arduino:avr:uno $PWD/examples/IncomingCall/IncomingCall.ino
-#  - arduino --verify --board arduino:avr:uno $PWD/examples/AdafruitIO_GPS/AdafruitIO_GPS.ino
 notifications:
   email:
     on_success: change
