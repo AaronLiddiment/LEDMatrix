@@ -2,7 +2,7 @@
 #include <LEDMatrix.h>
 
 // Change the next defines to match your matrix type and size
-#define DATA_PIN            D5
+#define DATA_PIN            GPIO14
 
 #define COLOR_ORDER         GRB
 #define CHIPSET             WS2812B
