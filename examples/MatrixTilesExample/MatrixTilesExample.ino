@@ -25,7 +25,6 @@
 // create our matrix based on matrix definition
 cLEDMatrix<MATRIX_TILE_WIDTH, MATRIX_TILE_HEIGHT, HORIZONTAL_ZIGZAG_MATRIX, MATRIX_TILE_H, MATRIX_TILE_V, VERTICAL_BLOCKS> leds;
 
-
 uint8_t angle = 0;
 
 void setup()
