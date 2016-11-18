@@ -1,5 +1,5 @@
-#include <FastLED.h>
-#include <LEDMatrix.h>
+#include <FastLED.h>        //https://github.com/FastLED/FastLED
+#include <LEDMatrix.h>      //https://github.com/Jorgen-VikingGod/LEDMatrix
 
 // Change the next defines to match your matrix type and size
 #define DATA_PIN            4

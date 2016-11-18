@@ -1,5 +1,5 @@
-#include <FastLED.h>
-#include <LEDMatrix.h>
+#include <FastLED.h>        //https://github.com/FastLED/FastLED
+#include <LEDMatrix.h>      //https://github.com/Jorgen-VikingGod/LEDMatrix
 
 // Change the next defines to match your matrix type and size
 #define DATA_PIN            14
@@ -8,11 +8,11 @@
 #define CHIPSET             WS2812B
 
 // initial matrix layout (to get led strip index by x/y)
-#define MATRIX_WIDTH   11
-#define MATRIX_HEIGHT  11
-#define MATRIX_TYPE    HORIZONTAL_ZIGZAG_MATRIX
-#define MATRIX_SIZE    (MATRIX_WIDTH*MATRIX_HEIGHT)
-#define NUMPIXELS      MATRIX_SIZE
+#define MATRIX_WIDTH        11
+#define MATRIX_HEIGHT       11
+#define MATRIX_TYPE         HORIZONTAL_ZIGZAG_MATRIX
+#define MATRIX_SIZE         (MATRIX_WIDTH*MATRIX_HEIGHT)
+#define NUMPIXELS           MATRIX_SIZE
 
 // create our matrix based on matrix definition
 cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> leds;
