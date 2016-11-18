@@ -1,25 +1,31 @@
 #include <FastLED.h>
-#include <FastLED_GFX.h> // https://github.com/Jorgen-VikingGod/FastLED-GFX
 #include <LEDMatrix.h>
 
-// Change the next 6 defines to match your matrix type and size
+// Change the next defines to match your matrix type and size
+#define DATA_PIN            D5
 
-#define LED_PIN        2
-#define COLOR_ORDER    GRB
-#define CHIPSET        WS2812B
+#define COLOR_ORDER         GRB
+#define CHIPSET             WS2812B
 
-#define MATRIX_WIDTH   80  // Set this negative if physical led 0 is opposite to where you want logical 0
-#define MATRIX_HEIGHT  10  // Set this negative if physical led 0 is opposite to where you want logical 0
-#define MATRIX_TYPE    (MTX_MATRIX_TOP + MTX_MATRIX_LEFT + MTX_MATRIX_ROWS + MTX_MATRIX_ZIGZAG) // See top of LEDMatrix.h for matrix wiring types
+// initial matrix layout (to get led strip index by x/y)
+#define MATRIX_WIDTH   11
+#define MATRIX_HEIGHT  11
+#define MATRIX_TYPE    HORIZONTAL_ZIGZAG_MATRIX
+#define MATRIX_SIZE    (MATRIX_WIDTH*MATRIX_HEIGHT)
+#define NUMPIXELS      MATRIX_SIZE
 
+// create our matrix based on matrix definition
 cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> leds;
+
 
 uint8_t hue;
 int16_t counter;
 
 void setup()
 {
-  FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds[0], leds.Size());
+  // initial LEDs
+  FastLED.addLeds<CHIPSET, DATA_PIN, COLOR_ORDER>(leds[0], leds.Size()).setCorrection(TypicalSMD5050);
+  FastLED.setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(127);
   FastLED.clear(true);
   delay(500);

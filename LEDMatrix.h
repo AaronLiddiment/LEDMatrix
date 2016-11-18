@@ -1,476 +1,595 @@
-/*--------------------------------------------------------------------
-  Source code is based on https://github.com/adafruit/Adafruit_NeoMatrix
-  and on https://github.com/AaronLiddiment/LEDMatrix
-  replace internal use of NeoPixel library with CRGB array to use with FastLED
-
+/* 
+  LEDMatrix V5 class by Aaron Liddiment (c) 2016
   modified:  Juergen Skrotzky (JorgenVikingGod@gmail.com)
   date:      2016/04/27
-  --------------------------------------------------------------------
-  Original copyright & description below
-  --------------------------------------------------------------------
-  This file is part of the Adafruit NeoMatrix library.
+*/
 
-  NeoMatrix is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Lesser General Public License as
-  published by the Free Software Foundation, either version 3 of
-  the License, or (at your option) any later version.
+#ifndef LEDMatrix_h
+#define LEDMatrix_h
 
-  NeoMatrix is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Lesser General Public License for more details.
+enum MatrixType_t { HORIZONTAL_MATRIX,
+                    VERTICAL_MATRIX,
+                    HORIZONTAL_ZIGZAG_MATRIX,
+                    VERTICAL_ZIGZAG_MATRIX };
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with NeoMatrix.  If not, see
-  <http://www.gnu.org/licenses/>.
-  --------------------------------------------------------------------
-  LEDMatrix V4 class by Aaron Liddiment (c) 2015
-  Inspiration for some of the Matrix functions from Stefan Petrick
-  FastLED v3.1 library by Daniel Garcia and Mark Kriegsmann.
-  Written & tested on a Teensy 3.1 using Arduino V1.6.3 & teensyduino V1.22
-  --------------------------------------------------------------------*/
+enum BlockType_t	{	HORIZONTAL_BLOCKS,
+										VERTICAL_BLOCKS,
+										HORIZONTAL_ZIGZAG_BLOCKS,
+										VERTICAL_ZIGZAG_BLOCKS };
 
-#ifndef _LEDMATRIX_H_
-#define _LEDMATRIX_H_
+class cLEDMatrixBase
+{
+  friend class cSprite;
 
-#if ARDUINO >= 100
- #include <Arduino.h>
-#else
- #include <WProgram.h>
- #include <pins_arduino.h>
-#endif
-#include <FastLED_GFX.h>
+  protected:
+    int16_t m_Width, m_Height;
+    struct CRGB *m_LED;
+    struct CRGB m_OutOfBounds;
 
-// Matrix layout information is passed in the 'matrixType' parameter for
-// each constructor.
+  public:
+    cLEDMatrixBase();
+    virtual uint16_t mXY(uint16_t x, uint16_t y)=0;
+    void SetLEDArray(struct CRGB *pLED);	// Only used with externally defined LED arrays
 
-// These define the layout for a single 'unified' matrix (e.g. one made
-// from NeoPixel strips, or a single NeoPixel shield), or for the pixels
-// within each matrix of a tiled display (e.g. multiple NeoPixel shields).
-#define MTX_MATRIX_TOP         0x00 // Pixel 0 is at top of matrix
-#define MTX_MATRIX_BOTTOM      0x01 // Pixel 0 is at bottom of matrix
-#define MTX_MATRIX_LEFT        0x00 // Pixel 0 is at left of matrix
-#define MTX_MATRIX_RIGHT       0x02 // Pixel 0 is at right of matrix
-#define MTX_MATRIX_CORNER      0x03 // Bitmask for pixel 0 matrix corner
-#define MTX_MATRIX_ROWS        0x00 // Matrix is row major (horizontal)
-#define MTX_MATRIX_COLUMNS     0x04 // Matrix is column major (vertical)
-#define MTX_MATRIX_AXIS        0x04 // Bitmask for row/column layout
-#define MTX_MATRIX_PROGRESSIVE 0x00 // Same pixel order across each line
-#define MTX_MATRIX_ZIGZAG      0x08 // Pixel order reverses between lines
-#define MTX_MATRIX_SEQUENCE    0x08 // Bitmask for pixel line order
+    struct CRGB *operator[](int n);
+    struct CRGB &operator()(int16_t x, int16_t y);
+    struct CRGB &operator()(int16_t i);
 
-// These apply only to tiled displays (multiple matrices):
-#define MTX_TILE_TOP           0x00 // First tile is at top of matrix
-#define MTX_TILE_BOTTOM        0x10 // First tile is at bottom of matrix
-#define MTX_TILE_LEFT          0x00 // First tile is at left of matrix
-#define MTX_TILE_RIGHT         0x20 // First tile is at right of matrix
-#define MTX_TILE_CORNER        0x30 // Bitmask for first tile corner
-#define MTX_TILE_ROWS          0x00 // Tiles ordered in rows
-#define MTX_TILE_COLUMNS       0x40 // Tiles ordered in columns
-#define MTX_TILE_AXIS          0x40 // Bitmask for tile H/V orientation
-#define MTX_TILE_PROGRESSIVE   0x00 // Same tile order across each line
-#define MTX_TILE_ZIGZAG        0x80 // Tile order reverses between lines
-#define MTX_TILE_SEQUENCE      0x80 // Bitmask for tile line order
+    int Size()  { return(m_Width * m_Height); }
+    int Width() { return(m_Width);  }
+    int Height()  { return(m_Height); }
 
-class cLEDMatrixBase: public FastLED_GFX {
-friend class cSprite;
+    void HorizontalMirror(bool FullHeight = true);
+    void VerticalMirror();
+    void QuadrantMirror();
+    void QuadrantRotateMirror();
+    void TriangleTopMirror(bool FullHeight = true);
+    void TriangleBottomMirror(bool FullHeight = true);
+    void QuadrantTopTriangleMirror();
+    void QuadrantBottomTriangleMirror();
 
-protected:
-  struct CRGB *m_LED;
-  struct CRGB m_OutOfBounds;
-  uint8_t type;
-  uint8_t matrixWidth;
-  uint8_t matrixHeight;
-  uint8_t tilesX;
-  uint8_t tilesY;
-  uint16_t (*remapFn)(uint16_t x, uint16_t y);
-
-public:
-  cLEDMatrixBase(int w, int h);
-
-  virtual uint16_t mXY(uint16_t x, uint16_t y);
-  void SetLEDArray(struct CRGB *pLED);	// Only used with externally defined LED arrays
-
-  struct CRGB *operator[](int n);
-  struct CRGB &operator()(int16_t x, int16_t y);
-  struct CRGB &operator()(int16_t i);
-
-  int Size()   { return(_width * _height); }
-  int Width()  { return(_width); }
-  int Height() { return(_height); }
-
-  void HorizontalMirror(bool FullHeight = true);
-  void VerticalMirror();
-  void QuadrantMirror();
-  void QuadrantRotateMirror();
-  void TriangleTopMirror(bool FullHeight = true);
-  void TriangleBottomMirror(bool FullHeight = true);
-  void QuadrantTopTriangleMirror();
-  void QuadrantBottomTriangleMirror();
-
-  void DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB color);
-  void DrawRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB color);
-  void DrawCircle(int16_t xc, int16_t yc, uint16_t r, CRGB color);
-  void DrawFilledRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB color);
-  void DrawFilledCircle(int16_t xc, int16_t yc, uint16_t r, CRGB color);
-
-  void drawPixel(int n, CRGB color);
-  void drawPixel(int16_t x, int16_t y, CRGB color);
-  struct CRGB & pixel(int n);
-  struct CRGB & pixel(int16_t x, int16_t y);
-  void fillScreen(CRGB color);
-  void setRemapFunction(uint16_t (*fn)(uint16_t, uint16_t));
+    void DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB Col);
+    void DrawRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB Col);
+    void DrawCircle(int16_t xc, int16_t yc, uint16_t r, CRGB Col);
+    void DrawFilledRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB Col);
+    void DrawFilledCircle(int16_t xc, int16_t yc, uint16_t r, CRGB Col);
 };
 
-template<uint8_t matrixW, uint8_t matrixH, uint8_t matrixType = MTX_MATRIX_TOP + MTX_MATRIX_LEFT + MTX_MATRIX_ROWS + MTX_MATRIX_ZIGZAG + MTX_TILE_TOP + MTX_TILE_LEFT + MTX_TILE_ROWS + MTX_TILE_ZIGZAG, uint8_t tX = 0, uint8_t tY = 0> class cLEDMatrix : public cLEDMatrixBase {
-private:
-  static const int m_absWidth  = (matrixW * (tX >0?tX:1));
-  static const int m_absHeight = (matrixH * (tY >0?tY:1));
-  struct CRGB p_LED[(m_absWidth * m_absHeight)];
-public:
-  cLEDMatrix()
-    : cLEDMatrixBase(m_absWidth, m_absHeight) {
-      type = matrixType;
-      matrixWidth = matrixW;
-      matrixHeight = matrixH;
-      tilesX = tX;
-      tilesY = tY;
-      remapFn = NULL;
-      m_LED = p_LED;
-  }
-  void SetLEDArray(struct CRGB *pLED) {
-    m_LED = pLED;
-  }
+template<int16_t tMWidth, int16_t tMHeight, MatrixType_t tMType, int8_t tBWidth = 1, int8_t tBHeight = 1, BlockType_t tBType = HORIZONTAL_BLOCKS> class cLEDMatrix : public cLEDMatrixBase
+{
+  private:
+    static const int16_t m_absMWidth = (tMWidth * ((tMWidth < 0) * -1 + (tMWidth > 0)));
+    static const int16_t m_absMHeight = (tMHeight * ((tMHeight < 0) * -1 + (tMHeight > 0)));
+    static const int16_t m_absBWidth = (tBWidth * ((tBWidth < 0) * -1 + (tBWidth > 0)));
+    static const int16_t m_absBHeight = (tBHeight * ((tBHeight < 0) * -1 + (tBHeight > 0)));
+    struct CRGB p_LED[m_absMWidth * m_absBWidth * m_absMHeight * m_absBHeight];
 
-  void ShiftLeft(void) {
-    /* t.b.d.
-    switch (tMType) {
-      case HORIZONTAL_MATRIX:
-        if (tWidth > 0)
-          HPWSL();
-        else
-          HNWSL();
-        break;
-      case VERTICAL_MATRIX:
-        if (tWidth > 0)
-          VPWSL();
-        else
-          VNWSL();
-        break;
-      case HORIZONTAL_ZIGZAG_MATRIX:
-        if (tWidth > 0)
-          HZPWSL();
-        else
-          HZNWSL();
-        break;
-      case VERTICAL_ZIGZAG_MATRIX:
-        if (tWidth > 0)
-          VZPWSL();
-        else
-          VZNWSL();
-        break;
-    }
-    */
-  }
-
-  void ShiftRight(void) {
-    /*
-    switch (tMType) {
-      case HORIZONTAL_MATRIX:
-        if (tWidth > 0)
-          HNWSL();
-        else
-          HPWSL();
-        break;
-      case VERTICAL_MATRIX:
-        if (tWidth > 0)
-          VNWSL();
-        else
-          VPWSL();
-        break;
-      case HORIZONTAL_ZIGZAG_MATRIX:
-        if (tWidth > 0)
-          HZNWSL();
-        else
-          HZPWSL();
-        break;
-      case VERTICAL_ZIGZAG_MATRIX:
-        if (tWidth > 0)
-          VZNWSL();
-        else
-          VZPWSL();
-        break;
-    }
-    */
-  }
-
-  void ShiftDown(void) {
-    /*
-    switch (tMType) {
-      case HORIZONTAL_MATRIX:
-        if (tHeight > 0)
-          HPHSD();
-        else
-          HNHSD();
-        break;
-      case VERTICAL_MATRIX:
-        if (tHeight > 0)
-          VPHSD();
-        else
-          VNHSD();
-        break;
-      case HORIZONTAL_ZIGZAG_MATRIX:
-        if (tHeight > 0)
-          HZPHSD();
-        else
-          HZNHSD();
-        break;
-      case VERTICAL_ZIGZAG_MATRIX:
-        if (tHeight > 0)
-          VZPHSD();
-        else
-          VZNHSD();
-        break;
-    }
-    */
-  }
-
-  void ShiftUp(void) {
-    /*
-    switch (tMType)
+  public:
+    cLEDMatrix()
     {
-      case HORIZONTAL_MATRIX:
-      	if (tHeight > 0)
-          HNHSD();
-        else
-          HPHSD();
-        break;
-      case VERTICAL_MATRIX:
-        if (tHeight > 0)
-          VNHSD();
-        else
-          VPHSD();
-        break;
-      case HORIZONTAL_ZIGZAG_MATRIX:
-        if (tHeight > 0)
-          HZNHSD();
-        else
-          HZPHSD();
-        break;
-      case VERTICAL_ZIGZAG_MATRIX:
-        if (tHeight > 0)
-          VZNHSD();
-        else
-          VZPHSD();
-        break;
+      m_Width = m_absMWidth * m_absBWidth;
+      m_Height = m_absMHeight * m_absBHeight;
+      m_LED = p_LED;
     }
-    */
-  }
+    void SetLEDArray(struct CRGB *pLED)
+    {
+      m_LED = pLED;
+    }
+    virtual uint16_t mXY(uint16_t x, uint16_t y)
+    {
+			if ((tBWidth == 1) && (tBHeight == 1))
+			{
+				// No Blocks, just a Matrix
+	      if (tMWidth < 0)
+	        x = (m_absMWidth - 1) - x;
+		    if (tMHeight < 0)
+	        y = (m_absMHeight - 1) - y;
+	      if (tMType == HORIZONTAL_MATRIX)
+	        return((y * m_absMWidth) + x);
+	      else if (tMType == VERTICAL_MATRIX)
+	        return((x * m_absMHeight) + y);
+	      else if (tMType == HORIZONTAL_ZIGZAG_MATRIX)
+	      {
+	        if (y % 2)
+	          return((((y + 1) * m_absMWidth) - 1) - x);
+	        else
+	          return((y * m_absMWidth) + x);
+	      }
+	      else /* if (tMType == VERTICAL_ZIGZAG_MATRIX) */
+	      {
+	        if (x % 2)
+	          return((((x + 1) * m_absMHeight) - 1) - y);
+	        else
+	          return((x * m_absMHeight) + y);
+	      }
+			}
+			else
+			{
+				// Reverse Block/Matrix X coordinate if needed
+				if ((tBWidth < 0) && (tMWidth < 0))
+					x = (((m_absBWidth - 1) - (x / m_absMWidth)) * m_absMWidth) + ((m_absMWidth - 1) - (x % m_absMWidth));
+				else if (tBWidth < 0)
+					x = (((m_absBWidth - 1) - (x / m_absMWidth)) * m_absMWidth) + (x % m_absMWidth);
+				else if (tMWidth < 0)
+					x = x - ((x % m_absMWidth) * 2) + (m_absMWidth - 1);
+				// Reverse Block/Matrix Y coordinate if needed
+				if ((tBHeight < 0) && (tMHeight < 0))
+					y = (((m_absBHeight - 1) - (y / m_absMHeight)) * m_absMHeight) + ((m_absMHeight - 1) - (y % m_absMHeight));
+				else if(tBHeight < 0)
+					y = (((m_absBHeight - 1) - (y / m_absMHeight)) * m_absMHeight) + (y % m_absMHeight);
+				else if (tMHeight < 0)
+					y = y - ((y % m_absMHeight) * 2) + (m_absMHeight - 1);
+				// Calculate Block base
+	    	uint16_t Base;
+		    if (tBType == HORIZONTAL_BLOCKS)
+		    	Base = (((y / m_absMHeight) * m_absBWidth) + (x / m_absMWidth)) * (m_absMWidth * m_absMHeight);
+		    else if (tBType == VERTICAL_BLOCKS)
+		    	Base = (((x / m_absMWidth) * m_absBHeight) + (y / m_absMHeight)) * (m_absMHeight * m_absMWidth);
+		    else if (tBType == HORIZONTAL_ZIGZAG_BLOCKS)
+		    {
+	        if ((y / m_absMHeight) % 2)
+			    	Base = (((y / m_absMHeight) * m_absBWidth) + ((m_absBWidth - 1) - (x / m_absMWidth))) * (m_absMWidth * m_absMHeight);
+	       	else
+			    	Base = (((y / m_absMHeight) * m_absBWidth) + (x / m_absMWidth)) * (m_absMWidth * m_absMHeight);
+	      }
+	      else /* if (tBType == VERTICAL_ZIGZAG_BLOCKS) */
+	      {
+	        if ((x / m_absMWidth) % 2)
+			    	Base = (((x / m_absMWidth) * m_absBHeight) + ((m_absBHeight - 1) - (y / m_absMHeight))) * (m_absMHeight * m_absMWidth);
+	        else
+			    	Base = (((x / m_absMWidth) * m_absBHeight) + (y / m_absMHeight)) * (m_absMHeight * m_absMWidth);
+	      }
+				// Calculate Matrix offset
+	      if (tMType == HORIZONTAL_MATRIX)
+	        return(Base + ((y % m_absMHeight) * m_absMWidth) + (x % m_absMWidth));
+	      else if (tMType == VERTICAL_MATRIX)
+	        return(Base + ((x % m_absMWidth) * m_absMHeight) + (y % m_absMHeight));
+	      else if (tMType == HORIZONTAL_ZIGZAG_MATRIX)
+	      {
+	        if ((y % m_absMHeight) % 2)
+	          return(Base + ((((y % m_absMHeight) + 1) * m_absMWidth) - 1) - (x % m_absMWidth));
+	        else
+	          return(Base + ((y % m_absMHeight) * m_absMWidth) + (x % m_absMWidth));
+	      }
+	      else /* if (tMType == VERTICAL_ZIGZAG_MATRIX) */
+	      {
+	        if ((x % m_absMWidth) % 2)
+	          return(Base + ((((x % m_absMWidth) + 1) * m_absMHeight) - 1) - (y % m_absMHeight));
+	        else
+	          return(Base + ((x % m_absMWidth) * m_absMHeight) + (y % m_absMHeight));
+	      }
+	    }
+    }
 
-private:
-	// Functions used by ShiftLeft & ShiftRight
-  void HPWSL(void) {
-    int16_t i = 0;
-    for (int16_t y=m_absHeight; y>0; --y,++i) {
-      for (int16_t x=m_absWidth-1; x>0; --x,++i)
-        p_LED[i] = p_LED[i + 1];
-      p_LED[i] = CRGB(0, 0, 0);
-    }
-  }
-  void HNWSL(void) {
-    int16_t i = m_absWidth - 1;
-    for (int16_t y=m_absHeight; y>0; --y) {
-      for (int16_t x=m_absWidth-1; x>0; --x,--i)
-        p_LED[i] = p_LED[i - 1];
-      p_LED[i] = CRGB(0, 0, 0);
-      i += ((m_absWidth * 2) - 1);
-    }
-  }
-  void VPWSL(void) {
-    int16_t i = 0;
-    int16_t j = m_absHeight;
-    for (int16_t x=m_absWidth-1; x>0; --x) {
-      for (int16_t y=m_absHeight; y>0; --y)
-        p_LED[i++] = p_LED[j++];
-    }
-    for (int16_t y=m_absHeight; y>0; --y)
-      p_LED[i++] = CRGB(0, 0, 0);
-  }
-  void VNWSL(void) {
-    int16_t i = (m_absHeight * m_absWidth) - 1;
-    int16_t j = i - m_absHeight;
-    for (int16_t x=m_absWidth-1; x>0; --x) {
-      for (int16_t y=m_absHeight; y>0; --y)
-        p_LED[i--] = p_LED[j--];
-    }
-    for (int16_t y=m_absHeight; y>0; --y)
-      p_LED[i--] = CRGB(0, 0, 0);
-  }
-  void HZPWSL(void) {
-    int16_t i = 0;
-    for (int16_t y=m_absHeight; y>0; y-=2) {
-      for (int16_t x=m_absWidth-1; x>0; --x,++i)
-        p_LED[i] = p_LED[i + 1];
-      p_LED[i] = CRGB(0, 0, 0);
-      i++;
-      if (y > 1) {
-        i += (m_absWidth - 1);
-        for (int16_t x=m_absWidth-1; x>0; --x,--i)
-          p_LED[i] = p_LED[i - 1];
-        p_LED[i] = CRGB(0, 0, 0);
-        i += m_absWidth;
+    void ShiftLeft(void)
+    {
+      if ((tBWidth != 1) || (tBHeight != 1))
+     	{
+				// Blocks, so no optimisation
+		    for (int16_t x=1; x<m_Width; ++x)
+  			{
+				  for (int16_t y=0; y<m_Height; ++y)
+      			m_LED[mXY(x - 1, y)] = m_LED[mXY(x, y)];
+			  }
+			  for (int16_t y=0; y<m_Height; ++y)
+     			m_LED[mXY(m_Width - 1, y)] = CRGB(0, 0, 0);
+     	}
+     	else
+      {
+				// No Blocks, just a Matrix so optimise a little
+        switch (tMType)
+        {
+          case HORIZONTAL_MATRIX:
+            if (tMWidth > 0)
+              HPWSL();
+            else
+              HNWSL();
+            break;
+          case VERTICAL_MATRIX:
+            if (tMWidth > 0)
+              VPWSL();
+            else
+              VNWSL();
+            break;
+          case HORIZONTAL_ZIGZAG_MATRIX:
+            if (tMWidth > 0)
+              HZPWSL();
+            else
+              HZNWSL();
+            break;
+          case VERTICAL_ZIGZAG_MATRIX:
+            if (tMWidth > 0)
+              VZPWSL();
+            else
+              VZNWSL();
+            break;
+        }
       }
     }
-  }
-  void HZNWSL(void) {
-    int16_t i = m_absWidth - 1;
-    for (int16_t y=m_absHeight; y>0; y-=2) {
-      for (int16_t x=m_absWidth-1; x>0; --x,--i)
-        p_LED[i] = p_LED[i - 1];
-      p_LED[i] = CRGB(0, 0, 0);
-      if (y > 1) {
-        i += m_absWidth;
-        for (int16_t x=m_absWidth-1; x>0; --x,++i)
+
+    void ShiftRight(void)
+    {
+      if ((tBWidth != 1) || (tBHeight != 1))
+     	{
+				// Blocks, so no optimisation
+		    for (int16_t x=m_Width-1; x>=1; --x)
+  			{
+				  for (int16_t y=0; y<m_Height; ++y)
+      			m_LED[mXY(x, y)] = m_LED[mXY(x - 1, y)];
+			  }
+			  for (int16_t y=0; y<m_Height; ++y)
+     			m_LED[mXY(0, y)] = CRGB(0, 0, 0);
+     	}
+     	else
+      {
+				// No Blocks, just a Matrix so optimise a little
+        switch (tMType)
+        {
+          case HORIZONTAL_MATRIX:
+            if (tMWidth > 0)
+              HNWSL();
+            else
+              HPWSL();
+            break;
+          case VERTICAL_MATRIX:
+            if (tMWidth > 0)
+              VNWSL();
+            else
+              VPWSL();
+            break;
+          case HORIZONTAL_ZIGZAG_MATRIX:
+            if (tMWidth > 0)
+              HZNWSL();
+            else
+              HZPWSL();
+            break;
+          case VERTICAL_ZIGZAG_MATRIX:
+            if (tMWidth > 0)
+              VZNWSL();
+            else
+              VZPWSL();
+            break;
+        }
+      }
+    }
+
+    void ShiftDown(void)
+    {
+      if ((tBWidth != 1) || (tBHeight != 1))
+     	{
+				// Blocks, so no optimisation
+			  for (int16_t y=1; y<m_Height; ++y)
+  			{
+			    for (int16_t x=0; x<m_Width; ++x)
+      			m_LED[mXY(x, y - 1)] = m_LED[mXY(x, y)];
+			  }
+		    for (int16_t x=0; x<m_Width; ++x)
+     			m_LED[mXY(x, m_Height - 1)] = CRGB(0, 0, 0);
+     	}
+     	else
+      {
+				// No Blocks, just a Matrix so optimise a little
+        switch (tMType)
+        {
+          case HORIZONTAL_MATRIX:
+            if (tMHeight > 0)
+              HPHSD();
+            else
+              HNHSD();
+            break;
+          case VERTICAL_MATRIX:
+            if (tMHeight > 0)
+              VPHSD();
+            else
+              VNHSD();
+            break;
+          case HORIZONTAL_ZIGZAG_MATRIX:
+            if (tMHeight > 0)
+              HZPHSD();
+            else
+              HZNHSD();
+            break;
+          case VERTICAL_ZIGZAG_MATRIX:
+            if (tMHeight > 0)
+              VZPHSD();
+            else
+              VZNHSD();
+            break;
+        }
+      }
+    }
+
+    void ShiftUp(void)
+    {
+      if ((tBWidth != 1) || (tBHeight != 1))
+     	{
+				// Blocks, so no optimisation
+			  for (int16_t y=m_Height-1; y>=1; --y)
+  			{
+			    for (int16_t x=0; x<m_Width; ++x)
+      			m_LED[mXY(x, y)] = m_LED[mXY(x, y - 1)];
+			  }
+		    for (int16_t x=0; x<m_Width; ++x)
+     			m_LED[mXY(x, 0)] = CRGB(0, 0, 0);
+     	}
+     	else
+      {
+				// No Blocks, just a Matrix so optimise a little
+        switch (tMType)
+        {
+          case HORIZONTAL_MATRIX:
+          	if (tMHeight > 0)
+              HNHSD();
+            else
+              HPHSD();
+            break;
+          case VERTICAL_MATRIX:
+            if (tMHeight > 0)
+              VNHSD();
+            else
+              VPHSD();
+            break;
+          case HORIZONTAL_ZIGZAG_MATRIX:
+            if (tMHeight > 0)
+              HZNHSD();
+            else
+              HZPHSD();
+            break;
+          case VERTICAL_ZIGZAG_MATRIX:
+            if (tMHeight > 0)
+              VZNHSD();
+            else
+              VZPHSD();
+            break;
+        }
+      }
+    }
+
+  private:
+  	// Optimised functions used by ShiftLeft & ShiftRight in non block mode
+    void HPWSL(void)
+    {
+      int16_t i = 0;
+      for (int16_t y=m_absMHeight; y>0; --y,++i)
+      {
+        for (int16_t x=m_absMWidth-1; x>0; --x,++i)
           p_LED[i] = p_LED[i + 1];
         p_LED[i] = CRGB(0, 0, 0);
-        i += m_absWidth;
       }
     }
-  }
-  void VZPWSL(void) {
-    int16_t i = 0;
-    int16_t j = (m_absHeight * 2) - 1;
-    for (int16_t x=m_absWidth-1; x>0; x-=2) {
-      for (int16_t y=m_absHeight; y>0; --y)
-        p_LED[i++] = p_LED[j--];
-      if (x > 1) {
-        j += (m_absHeight * 2);
-        for (int16_t y=m_absHeight; y>0; --y)
-          p_LED[i++] = p_LED[j--];
-        j += (m_absHeight * 2);
-      }
-    }
-    for (int16_t y=m_absHeight; y>0; y--)
-      p_LED[i++] = CRGB(0, 0, 0);
-  }
-  void VZNWSL(void) {
-    int16_t i = (m_absHeight * m_absWidth) - 1;
-    int16_t j = m_absHeight * (m_absWidth - 2);
-    for (int16_t x=m_absWidth-1; x>0; x-=2) {
-      for (int16_t y=m_absHeight; y>0; --y)
-        p_LED[i--] = p_LED[j++];
-      if (x > 1) {
-        j -= (m_absHeight * 2);
-        for (int16_t y=m_absHeight; y>0; --y)
-          p_LED[i--] = p_LED[j++];
-        j -= (m_absHeight * 2);
-      }
-    }
-    for (int16_t y=m_absHeight; y>0; y--)
-      p_LED[i--] = CRGB(0, 0, 0);
-  }
-
-	// Functions used by ShiftDown & ShiftUp
-  void HPHSD(void) {
-    int16_t i = 0;
-    int16_t j = m_absWidth;
-    for (int16_t y=m_absHeight-1; y>0; --y) {
-      for (int16_t x=m_absWidth; x>0; --x)
-        p_LED[i++] = p_LED[j++];
-    }
-    for (int16_t x=m_absWidth; x>0; --x)
-      p_LED[i++] = CRGB(0, 0, 0);
-  }
-  void HNHSD(void) {
-    int16_t i = (m_absWidth * m_absHeight) - 1;
-    int16_t j = i - m_absWidth;
-    for (int16_t y=m_absHeight-1; y>0; --y) {
-      for (int16_t x=m_absWidth; x>0; --x)
-        p_LED[i--] = p_LED[j--];
-    }
-    for (int16_t x=m_absWidth; x>0; --x)
-      p_LED[i--] = CRGB(0, 0, 0);
-  }
-  void VPHSD(void) {
-    int16_t i = 0;
-    for (int16_t x=m_absWidth; x>0; --x,++i) {
-      for (int16_t y=m_absHeight-1; y>0; --y,++i)
-        p_LED[i] = p_LED[i + 1];
-      p_LED[i] = CRGB(0, 0, 0);
-    }
-  }
-  void VNHSD(void) {
-    int16_t i = m_absHeight - 1;
-    for (int16_t x=m_absWidth; x>0; --x) {
-      for (int16_t y=m_absHeight-1; y>0; --y,--i)
-        p_LED[i] = p_LED[i - 1];
-      p_LED[i] = CRGB(0, 0, 0);
-      i += ((m_absHeight * 2) - 1);
-    }
-  }
-  void HZPHSD(void) {
-    int16_t i = 0;
-    int16_t j = (m_absWidth * 2) - 1;
-    for (int16_t y=m_absHeight-1; y>0; y-=2) {
-      for (int16_t x=m_absWidth; x>0; --x)
-        p_LED[i++] = p_LED[j--];
-      if (y > 1) {
-        j += (m_absWidth * 2);
-        for (int16_t x=m_absWidth; x>0; --x)
-          p_LED[i++] = p_LED[j--];
-        j += (m_absWidth * 2);
-      }
-    }
-    for (int16_t x=m_absWidth; x>0; x--)
-      p_LED[i++] = CRGB(0, 0, 0);
-  }
-  void HZNHSD(void) {
-    int16_t i = (m_absWidth * m_absHeight) - 1;
-    int16_t j = m_absWidth * (m_absHeight - 2);
-    for (int16_t y=m_absHeight-1; y>0; y-=2) {
-      for (int16_t x=m_absWidth; x>0; --x)
-        p_LED[i--] = p_LED[j++];
-      if (y > 1) {
-        j -= (m_absWidth * 2);
-        for (int16_t x=m_absWidth; x>0; --x)
-          p_LED[i--] = p_LED[j++];
-        j -= (m_absWidth * 2);
-      }
-    }
-    for (int16_t x=m_absWidth; x>0; x--)
-      p_LED[i--] = CRGB(0, 0, 0);
-  }
-  void VZPHSD(void) {
-    int16_t i = 0;
-    for (int16_t x=m_absWidth; x>0; x-=2) {
-      for (int16_t y=m_absHeight-1; y>0; --y,++i)
-        p_LED[i] = p_LED[i + 1];
-      p_LED[i] = CRGB(0, 0, 0);
-      i++;
-      if (x > 1) {
-        i += (m_absHeight - 1);
-        for (int16_t y=m_absHeight-1; y>0; --y,--i)
+    void HNWSL(void)
+    {
+      int16_t i = m_absMWidth - 1;
+      for (int16_t y=m_absMHeight; y>0; --y)
+      {
+        for (int16_t x=m_absMWidth-1; x>0; --x,--i)
           p_LED[i] = p_LED[i - 1];
         p_LED[i] = CRGB(0, 0, 0);
-        i += m_absHeight;
+        i += ((m_absMWidth * 2) - 1);
       }
     }
-  }
-  void VZNHSD(void) {
-    int16_t i = m_absHeight - 1;
-    for (int16_t x=m_absWidth; x>0; x-=2) {
-      for (int16_t y=m_absHeight-1; y>0; --y,--i)
-        p_LED[i] = p_LED[i - 1];
-      p_LED[i] = CRGB(0, 0, 0);
-      if (x > 1) {
-        i += m_absHeight;
-        for (int16_t y=m_absHeight-1; y>0; --y,++i)
+    void VPWSL(void)
+    {
+      int16_t i = 0;
+      int16_t j = m_absMHeight;
+      for (int16_t x=m_absMWidth-1; x>0; --x)
+      {
+        for (int16_t y=m_absMHeight; y>0; --y)
+          p_LED[i++] = p_LED[j++];
+      }
+      for (int16_t y=m_absMHeight; y>0; --y)
+        p_LED[i++] = CRGB(0, 0, 0);
+    }
+    void VNWSL(void)
+    {
+      int16_t i = (m_absMHeight * m_absMWidth) - 1;
+      int16_t j = i - m_absMHeight;
+      for (int16_t x=m_absMWidth-1; x>0; --x)
+      {
+        for (int16_t y=m_absMHeight; y>0; --y)
+          p_LED[i--] = p_LED[j--];
+      }
+      for (int16_t y=m_absMHeight; y>0; --y)
+        p_LED[i--] = CRGB(0, 0, 0);
+    }
+    void HZPWSL(void)
+    {
+      int16_t i = 0;
+      for (int16_t y=m_absMHeight; y>0; y-=2)
+      {
+        for (int16_t x=m_absMWidth-1; x>0; --x,++i)
           p_LED[i] = p_LED[i + 1];
         p_LED[i] = CRGB(0, 0, 0);
-        i += m_absHeight;
+        i++;
+        if (y > 1)
+        {
+          i += (m_absMWidth - 1);
+          for (int16_t x=m_absMWidth-1; x>0; --x,--i)
+            p_LED[i] = p_LED[i - 1];
+          p_LED[i] = CRGB(0, 0, 0);
+          i += m_absMWidth;
+        }
       }
     }
-  }
+    void HZNWSL(void)
+    {
+      int16_t i = m_absMWidth - 1;
+      for (int16_t y=m_absMHeight; y>0; y-=2)
+      {
+        for (int16_t x=m_absMWidth-1; x>0; --x,--i)
+          p_LED[i] = p_LED[i - 1];
+        p_LED[i] = CRGB(0, 0, 0);
+        if (y > 1)
+        {
+          i += m_absMWidth;
+          for (int16_t x=m_absMWidth-1; x>0; --x,++i)
+            p_LED[i] = p_LED[i + 1];
+          p_LED[i] = CRGB(0, 0, 0);
+          i += m_absMWidth;
+        }
+      }
+    }
+    void VZPWSL(void)
+    {
+      int16_t i = 0;
+      int16_t j = (m_absMHeight * 2) - 1;
+      for (int16_t x=m_absMWidth-1; x>0; x-=2)
+      {
+        for (int16_t y=m_absMHeight; y>0; --y)
+          p_LED[i++] = p_LED[j--];
+        if (x > 1)
+        {
+          j += (m_absMHeight * 2);
+          for (int16_t y=m_absMHeight; y>0; --y)
+            p_LED[i++] = p_LED[j--];
+          j += (m_absMHeight * 2);
+        }
+      }
+      for (int16_t y=m_absMHeight; y>0; y--)
+        p_LED[i++] = CRGB(0, 0, 0);
+    }
+    void VZNWSL(void)
+    {
+      int16_t i = (m_absMHeight * m_absMWidth) - 1;
+      int16_t j = m_absMHeight * (m_absMWidth - 2);
+      for (int16_t x=m_absMWidth-1; x>0; x-=2)
+      {
+        for (int16_t y=m_absMHeight; y>0; --y)
+          p_LED[i--] = p_LED[j++];
+        if (x > 1)
+        {
+          j -= (m_absMHeight * 2);
+          for (int16_t y=m_absMHeight; y>0; --y)
+            p_LED[i--] = p_LED[j++];
+          j -= (m_absMHeight * 2);
+        }
+      }
+      for (int16_t y=m_absMHeight; y>0; y--)
+        p_LED[i--] = CRGB(0, 0, 0);
+    }
+
+  	// Optimised functions used by ShiftDown & ShiftUp in non block mode
+    void HPHSD(void)
+    {
+      int16_t i = 0;
+      int16_t j = m_absMWidth;
+      for (int16_t y=m_absMHeight-1; y>0; --y)
+      {
+        for (int16_t x=m_absMWidth; x>0; --x)
+          p_LED[i++] = p_LED[j++];
+      }
+      for (int16_t x=m_absMWidth; x>0; --x)
+        p_LED[i++] = CRGB(0, 0, 0);
+    }
+    void HNHSD(void)
+    {
+      int16_t i = (m_absMWidth * m_absMHeight) - 1;
+      int16_t j = i - m_absMWidth;
+      for (int16_t y=m_absMHeight-1; y>0; --y)
+      {
+        for (int16_t x=m_absMWidth; x>0; --x)
+          p_LED[i--] = p_LED[j--];
+      }
+      for (int16_t x=m_absMWidth; x>0; --x)
+        p_LED[i--] = CRGB(0, 0, 0);
+    }
+    void VPHSD(void)
+    {
+      int16_t i = 0;
+      for (int16_t x=m_absMWidth; x>0; --x,++i)
+      {
+        for (int16_t y=m_absMHeight-1; y>0; --y,++i)
+          p_LED[i] = p_LED[i + 1];
+        p_LED[i] = CRGB(0, 0, 0);
+      }
+    }
+    void VNHSD(void)
+    {
+      int16_t i = m_absMHeight - 1;
+      for (int16_t x=m_absMWidth; x>0; --x)
+      {
+        for (int16_t y=m_absMHeight-1; y>0; --y,--i)
+          p_LED[i] = p_LED[i - 1];
+        p_LED[i] = CRGB(0, 0, 0);
+        i += ((m_absMHeight * 2) - 1);
+      }
+    }
+    void HZPHSD(void)
+    {
+      int16_t i = 0;
+      int16_t j = (m_absMWidth * 2) - 1;
+      for (int16_t y=m_absMHeight-1; y>0; y-=2)
+      {
+        for (int16_t x=m_absMWidth; x>0; --x)
+          p_LED[i++] = p_LED[j--];
+        if (y > 1)
+        {
+          j += (m_absMWidth * 2);
+          for (int16_t x=m_absMWidth; x>0; --x)
+            p_LED[i++] = p_LED[j--];
+          j += (m_absMWidth * 2);
+        }
+      }
+      for (int16_t x=m_absMWidth; x>0; x--)
+        p_LED[i++] = CRGB(0, 0, 0);
+    }
+    void HZNHSD(void)
+    {
+      int16_t i = (m_absMWidth * m_absMHeight) - 1;
+      int16_t j = m_absMWidth * (m_absMHeight - 2);
+      for (int16_t y=m_absMHeight-1; y>0; y-=2)
+      {
+        for (int16_t x=m_absMWidth; x>0; --x)
+          p_LED[i--] = p_LED[j++];
+        if (y > 1)
+        {
+          j -= (m_absMWidth * 2);
+          for (int16_t x=m_absMWidth; x>0; --x)
+            p_LED[i--] = p_LED[j++];
+          j -= (m_absMWidth * 2);
+        }
+      }
+      for (int16_t x=m_absMWidth; x>0; x--)
+        p_LED[i--] = CRGB(0, 0, 0);
+    }
+    void VZPHSD(void)
+    {
+      int16_t i = 0;
+      for (int16_t x=m_absMWidth; x>0; x-=2)
+      {
+        for (int16_t y=m_absMHeight-1; y>0; --y,++i)
+          p_LED[i] = p_LED[i + 1];
+        p_LED[i] = CRGB(0, 0, 0);
+        i++;
+        if (x > 1)
+        {
+          i += (m_absMHeight - 1);
+          for (int16_t y=m_absMHeight-1; y>0; --y,--i)
+            p_LED[i] = p_LED[i - 1];
+          p_LED[i] = CRGB(0, 0, 0);
+          i += m_absMHeight;
+        }
+      }
+    }
+    void VZNHSD(void)
+    {
+      int16_t i = m_absMHeight - 1;
+      for (int16_t x=m_absMWidth; x>0; x-=2)
+      {
+        for (int16_t y=m_absMHeight-1; y>0; --y,--i)
+          p_LED[i] = p_LED[i - 1];
+        p_LED[i] = CRGB(0, 0, 0);
+        if (x > 1)
+        {
+          i += m_absMHeight;
+          for (int16_t y=m_absMHeight-1; y>0; --y,++i)
+            p_LED[i] = p_LED[i + 1];
+          p_LED[i] = CRGB(0, 0, 0);
+          i += m_absMHeight;
+        }
+      }
+    }
+
 };
 
-#endif // _LEDMATRIX_H_
+#endif

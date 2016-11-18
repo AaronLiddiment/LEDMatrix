@@ -1,18 +1,30 @@
 #include <FastLED.h>
-#include <FastLED_GFX.h> // https://github.com/Jorgen-VikingGod/FastLED-GFX
 #include <LEDMatrix.h>
 
-// Change the next 6 defines to match your matrix type and size
+// Change the next defines to match your matrix type and size
+#define DATA_PIN            D2
+#define CLOCK_PIN           D1
+#define DATA2_PIN           D4
+#define CLOCK2_PIN          D3
 
-#define LED_PIN        2
-#define COLOR_ORDER    GRB
-#define CHIPSET        WS2812B
+#define COLOR_ORDER         BGR
+#define CHIPSET             APA102
 
-#define MATRIX_WIDTH   80  // Set this negative if physical led 0 is opposite to where you want logical 0
-#define MATRIX_HEIGHT  10  // Set this negative if physical led 0 is opposite to where you want logical 0
-#define MATRIX_TYPE    (MTX_MATRIX_TOP + MTX_MATRIX_LEFT + MTX_MATRIX_ROWS + MTX_MATRIX_ZIGZAG) // See top of LEDMatrix.h for matrix wiring types
+#define MATRIX_TILE_WIDTH   16 // width of EACH NEOPIXEL MATRIX (not total display)
+#define MATRIX_TILE_HEIGHT  8 // height of each matrix
+#define MATRIX_TILE_H       1  // number of matrices arranged horizontally
+#define MATRIX_TILE_V       8  // number of matrices arranged vertically
+#define MATRIX_SIZE         (MATRIX_WIDTH*MATRIX_HEIGHT)
+#define MATRIX_PANEL        (MATRIX_WIDTH*MATRIX_HEIGHT)
 
-cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> leds;
+#define MATRIX_WIDTH        (MATRIX_TILE_WIDTH*MATRIX_TILE_H)
+#define MATRIX_HEIGHT       (MATRIX_TILE_HEIGHT*MATRIX_TILE_V)
+
+#define NUM_LEDS            (MATRIX_WIDTH*MATRIX_HEIGHT)
+
+// create our matrix based on matrix definition
+cLEDMatrix<MATRIX_TILE_WIDTH, MATRIX_TILE_HEIGHT, HORIZONTAL_ZIGZAG_MATRIX, MATRIX_TILE_H, MATRIX_TILE_V, VERTICAL_BLOCKS> leds;
+
 
 uint8_t angle = 0;
 
