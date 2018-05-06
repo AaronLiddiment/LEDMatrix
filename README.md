@@ -49,11 +49,11 @@ Once you have downloaded the Zip file, it should be extracted into your Arduino 
 ## Single Matrix ([Example](examples/MatrixExample1/MatrixExample1.ino))
 ----------------------------------------------------------------
 ### Parameters
-| Parameter    | Description                                 |
-| ------------ |---------------------------------------------|
-| Parameter 1  | width of matrix                             |
-| Parameter 2  | height of matrix                            |
-| Parameter 3  | MatrixType_t = matrix layout type           |
+| Parameter    | Description                                   |
+| ------------ |-----------------------------------------------|
+| Parameter 1  | width of matrix (negative for reverse order)  |
+| Parameter 2  | height of matrix  (negative for reverse order)|
+| Parameter 3  | MatrixType_t = matrix layout type             |
 
 ```c
 enum MatrixType_t { HORIZONTAL_MATRIX,
@@ -73,7 +73,7 @@ enum BlockType_t  { HORIZONTAL_BLOCKS,
 #include <LEDMatrix.h>
 ```
 
-### Decleration
+### Declaration
 ```c
 // Change the next defines to match your matrix type and size
 #define DATA_PIN            D5
@@ -89,7 +89,8 @@ enum BlockType_t  { HORIZONTAL_BLOCKS,
 #define NUMPIXELS      MATRIX_SIZE
 
 // create our matrix based on matrix definition
-cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> leds;
+cLEDMatrix<[-]MATRIX_WIDTH, [-]MATRIX_HEIGHT, MATRIX_TYPE> leds;
+To cope with a matrix wired right to left, add - in front of your width. Similarly if the matrix is wired down to up, add - in front of height.
 ```
 
 ### Initialize FastLED
@@ -133,7 +134,7 @@ enum BlockType_t  { HORIZONTAL_BLOCKS,
 #include <LEDMatrix.h>
 ```
 
-### Decleration
+### Declaration
 ```c
 // Change the next defines to match your matrix type and size
 #define DATA_PIN            D2
@@ -146,8 +147,8 @@ enum BlockType_t  { HORIZONTAL_BLOCKS,
 
 #define MATRIX_TILE_WIDTH   16 // width of EACH NEOPIXEL MATRIX (not total display)
 #define MATRIX_TILE_HEIGHT  8 // height of each matrix
-#define MATRIX_TILE_H       1  // number of matrices arranged horizontally
-#define MATRIX_TILE_V       8  // number of matrices arranged vertically
+#define MATRIX_TILE_H       1  // number of matrices arranged horizontally (negative for reverse order)
+#define MATRIX_TILE_V       8  // number of matrices arranged vertically (negative for reverse order)
 #define MATRIX_SIZE         (MATRIX_WIDTH*MATRIX_HEIGHT)
 #define MATRIX_PANEL        (MATRIX_WIDTH*MATRIX_HEIGHT)
 
@@ -157,7 +158,7 @@ enum BlockType_t  { HORIZONTAL_BLOCKS,
 #define NUM_LEDS            (MATRIX_WIDTH*MATRIX_HEIGHT)
 
 // create our matrix based on matrix definition
-cLEDMatrix<MATRIX_TILE_WIDTH, MATRIX_TILE_HEIGHT, HORIZONTAL_ZIGZAG_MATRIX, MATRIX_TILE_H, MATRIX_TILE_V, VERTICAL_BLOCKS> leds;
+cLEDMatrix<[-]MATRIX_TILE_WIDTH, [-]MATRIX_TILE_HEIGHT, HORIZONTAL_ZIGZAG_MATRIX, [-]MATRIX_TILE_H, [-]MATRIX_TILE_V, VERTICAL_BLOCKS> leds;
 ```
 
 ### Initialize FastLED
