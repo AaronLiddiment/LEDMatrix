@@ -209,6 +209,7 @@ void TriangleBottomMirror(bool FullHeight = true)
 void QuadrantTopTriangleMirror()
 void QuadrantBottomTriangleMirror()
 
+void DrawPixel(int16_t x, int16_t y, CRGB color)
 void DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB color)
 void DrawRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB color)
 void DrawCircle(int16_t xc, int16_t yc, uint16_t r, CRGB color)
