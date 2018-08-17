@@ -153,21 +153,21 @@ void cLEDMatrixBase::DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CR
     int32_t y = ((int32_t)y0 << 16) + 32768;
     if (dx == 0)
     {
-    	(*this)(x0, (y >> 16)) = Col
+      (*this)(x0, (y >> 16)) = Col
    	}
    	else
    	{
-	    int32_t f = ((int32_t)dy << 16) / (int32_t)abs(dx);
-  	  if (dx >= 0)
-    	{
-      	for (; x0<=x1; ++x0,y+=f)
-        	(*this)(x0, (y >> 16)) = Col;
-	    }
-  	  else
-    	{
-      	for (; x0>=x1; --x0,y+=f)
-       	 (*this)(x0, (y >> 16)) = Col;
-    	}
+      int32_t f = ((int32_t)dy << 16) / (int32_t)abs(dx);
+      if (dx >= 0)
+      {
+        for (; x0<=x1; ++x0,y+=f)
+          (*this)(x0, (y >> 16)) = Col;
+      }
+      else
+      {
+        for (; x0>=x1; --x0,y+=f)
+       	  (*this)(x0, (y >> 16)) = Col;
+      }
     }
   }
   else
