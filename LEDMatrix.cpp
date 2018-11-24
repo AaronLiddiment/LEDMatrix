@@ -1,8 +1,6 @@
 /*
 LEDMatrix V4 class by Aaron Liddiment (c) 2015
-
 Inspiration for some of the Matrix functions from Stefan Petrick
-
 FastLED v3.1 library by Daniel Garcia and Mark Kriegsmann.
 Written & tested on a Teensy 3.1 using Arduino V1.6.3 & teensyduino V1.22
 */
@@ -153,7 +151,7 @@ void cLEDMatrixBase::DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CR
     int32_t y = ((int32_t)y0 << 16) + 32768;
     if (dx == 0)
     {
-      (*this)(x0, (y >> 16)) = Col
+      (*this)(x0, (y >> 16)) = Col;
    	}
    	else
    	{
