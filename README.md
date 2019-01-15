@@ -216,3 +216,8 @@ void DrawCircle(int16_t xc, int16_t yc, uint16_t r, CRGB color)
 void DrawFilledRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, CRGB color)
 void DrawFilledCircle(int16_t xc, int16_t yc, uint16_t r, CRGB color)
 ```
+
+## Compatibility with SmartMatrix supported RGBPanels
+
+NeoMatrix displays can be big, typically 1cm^2 per pixel, sometimes more. If you need Matrices that are both smaller and cheaper, you can use RGBPanels which are supported by SmartMatrix: https://github.com/pixelmatix/SmartMatrix  
+If you also install https://github.com/marcmerlin/SmartMatrix_GFX you get a compat layer that lets you run FastLED and LEDMatrix code. See https://github.com/marcmerlin/FastLED_NeoMatrix_SmartMatrix_LEDMatrix_GFX_Demos/tree/master/LEDMatrix for examples.
