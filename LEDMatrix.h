@@ -63,17 +63,29 @@ template<int16_t tMWidth, int16_t tMHeight, MatrixType_t tMType, int8_t tBWidth 
     static const int16_t m_absMHeight = (tMHeight * ((tMHeight < 0) * -1 + (tMHeight > 0)));
     static const int16_t m_absBWidth = (tBWidth * ((tBWidth < 0) * -1 + (tBWidth > 0)));
     static const int16_t m_absBHeight = (tBHeight * ((tBHeight < 0) * -1 + (tBHeight > 0)));
-    struct CRGB p_LED[m_absMWidth * m_absBWidth * m_absMHeight * m_absBHeight];
+    struct CRGB *p_LED;
 
   public:
-    cLEDMatrix()
+    cLEDMatrix(bool doMalloc=true)
     {
       m_Width = m_absMWidth * m_absBWidth;
       m_Height = m_absMHeight * m_absBHeight;
-      m_LED = p_LED;
+      if (doMalloc) {
+	  // On ESP32, there is more memory available via malloc than static global arrays
+          p_LED = (struct CRGB *) malloc(m_absMWidth * m_absBWidth * m_absMHeight * m_absBHeight * sizeof(CRGB));
+          m_LED = p_LED;
+	  if (! p_LED) {
+	     Serial.begin(115200);
+	     Serial.println("Malloc LEDMatrix Failed");
+	     while (1);
+	  }
+      } else {
+	  Serial.println("LED array not intialized, must be set by SetLEDArray");
+      }
     }
     void SetLEDArray(struct CRGB *pLED)
     {
+      p_LED = pLED;
       m_LED = pLED;
     }
     virtual uint16_t mXY(uint16_t x, uint16_t y)
