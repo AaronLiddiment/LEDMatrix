@@ -7,6 +7,8 @@
 
 > A fork of ([cLEDMatrix](https://github.com/AaronLiddiment/LEDMatrix) by [Aaron Liddiment](https://github.com/AaronLiddiment)) and build in some features from ([Adafruit-NeoMatrix](https://github.com/adafruit/Adafruit_NeoMatrix))
 
+As another option, if you would like full Adafruit::Neomatrix support, you can check this library: https://github.com/marcmerlin/FastLED_NeoMatrix  A big plus of access to the full Adafruit GFX compatibility is font support
+
 Once you have downloaded the Zip file, it should be extracted into your Arduino Libraries folder and the folder renamed to "LEDMatrix".
 
 <table>
