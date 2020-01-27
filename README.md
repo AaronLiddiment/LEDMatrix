@@ -223,3 +223,14 @@ void DrawFilledCircle(int16_t xc, int16_t yc, uint16_t r, CRGB color)
 
 NeoMatrix displays can be big, typically 1cm^2 per pixel, sometimes more. If you need Matrices that are both smaller and cheaper, you can use RGBPanels which are supported by SmartMatrix: https://github.com/pixelmatix/SmartMatrix  
 If you also install https://github.com/marcmerlin/SmartMatrix_GFX you get a compat layer that lets you run FastLED and LEDMatrix code. See https://github.com/marcmerlin/FastLED_NeoMatrix_SmartMatrix_LEDMatrix_GFX_Demos/tree/master/LEDMatrix for examples.
+
+## Running/Debugging your LEDMatrix code on a Linux Computer
+
+For ease of development, you can develop and debug your code on linux using ArduinoOnPc-FastLED-GFX-LEDMatrix.
+
+http://marc.merlins.org/perso/arduino/post_2020-01-24_Running-Arduino-code-with-2D-FastLED_-Adafruit_GFX_-and-LEDMatrix-displays-on-Linux.html introduces https://github.com/marcmerlin/ArduinoOnPc-FastLED-GFX-LEDMatrix
+
+This solution allows you to build arduino code so that it works on linux (you can run it in a VM if you aren't running linux natively) and uses these layers:
+- https://github.com/marcmerlin/ArduinoOnPc-FastLED-GFX-LEDMatrix
+- https://github.com/marcmerlin/Framebuffer_GFX is the base arduino framebuffer that also supports more 2D arduino code in addition to Adafruit::GFX, including code that uses LEDMatrix.
+- https://github.com/marcmerlin/FastLED_TFTWrapper_GFX is the driver that bridges that framebuffer with X11 (LINUX_RENDERER_X11) and the APIs it supports (FastLED, Adafruit::GFX, and LEDMatrix), with rpi-rgb-led-matrix for display. The other option is to use the faster LINUX_RENDERER_SDL which emulates FastLED and allows running native FastLED::NeoMatrix
